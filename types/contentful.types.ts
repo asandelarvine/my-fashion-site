@@ -101,5 +101,25 @@ export interface ContentfulEvent {
   signUpLink: string;
 }
 
+// Community Fields
+export interface CommunityFields {
+  title: string;
+  description: string;
+  image?: Asset;
+}
+
+// Define Community Entry
+export type CommunityEntry = ContentfulEntry<CommunityFields>;
+
+// Processed Contentful Community
+export interface ContentfulCommunity {
+  title: string;
+  description: string;
+  image: {
+    url: string;
+    description: string;
+  };
+}
+
 // Union Type for Combined Entries
 export type CombinedPageEntry = AboutPageEntry | ResourcesPageEntry | BrandEntry | EventEntry;

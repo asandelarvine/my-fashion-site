@@ -1,5 +1,5 @@
 import { createClient } from 'contentful';
-import { ContentfulResource, AboutPageEntry, ContentfulBrand, ContentfulEvent } from '@/types/contentful.types';
+import { ContentfulResource, AboutPageEntry, ContentfulBrand, ContentfulEvent, ContentfulCommunity } from '@/types/contentful.types';
 
 export const contentfulClient = createClient({
   space: process.env.CONTENTFUL_SPACE_ID as string,
@@ -140,5 +140,32 @@ export const fetchEvents = async (): Promise<ContentfulEvent[]> => {
     return [];
   }
 };
+// Fetch Community data
+export const fetchCommunity = async (): Promise<ContentfulCommunity[]> => {
+  try {
+    const response = await contentfulClient.getEntries({
+      content_type: 'community',
+    });
 
+    return response.items.map((item) => {
+      const fields = item.fields;
+
+      const image = isAsset(fields.image)
+        ? {
+            url: fields.image.fields.file.url,
+            description: fields.image.fields.description || '',
+          }
+        : { url: '', description: '' };
+
+      return {
+        title: typeof fields.title === 'string' ? fields.title : '',
+        description: typeof fields.description === 'string' ? fields.description : '',
+        image,
+      };
+    });
+  } catch (error) {
+    console.error('Error fetching community data from Contentful:', error);
+    return [];
+  }
+};
 export default contentfulClient;
