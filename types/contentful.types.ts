@@ -1,5 +1,5 @@
 import { Document } from '@contentful/rich-text-types';
-import { Asset, EntryFields } from 'contentful';
+import { Asset, Entry, EntryFields } from 'contentful';
 
 // General Contentful Entry Interface
 export interface ContentfulEntry<T> {
@@ -101,25 +101,48 @@ export interface ContentfulEvent {
   signUpLink: string;
 }
 
-// Community Fields
+// Community Page Fields
+// Community Page Fields
 export interface CommunityFields {
   title: string;
   description: string;
-  image?: Asset;
+  bannerImage: Asset;
+  members: string[]; // assuming members is an array of string member names or IDs
+  upcomingEvents: EventEntry[]; // updated to match the structure used in the client
+  guidesForMembers: GuideEntry[]; // updated to match the structure used in the client
 }
+
+// Guide Fields
+export interface GuideFields {
+  title: string;
+  description: string;
+}
+
+// Define Guide Entry
+export type GuideEntry = ContentfulEntry<GuideFields>;
 
 // Define Community Entry
 export type CommunityEntry = ContentfulEntry<CommunityFields>;
 
-// Processed Contentful Community
-export interface ContentfulCommunity {
+// Processed Community Page
+export interface ProcessedCommunityPage {
   title: string;
   description: string;
-  image: {
+  bannerImage: {
     url: string;
     description: string;
   };
+  members: string[];
+  upcomingEvents: {
+    title: string;
+    description: string;
+    date: string;
+  }[];
+  guidesForMembers: {
+    title: string;
+    description: string;
+  }[];
 }
 
-// Union Type for Combined Entries
-export type CombinedPageEntry = AboutPageEntry | ResourcesPageEntry | BrandEntry | EventEntry;
+// Update Union Type for Combined Entries
+export type CombinedPageEntry = AboutPageEntry | ResourcesPageEntry | BrandEntry | EventEntry | CommunityEntry;
