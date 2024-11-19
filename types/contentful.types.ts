@@ -1,5 +1,6 @@
 import { Document } from '@contentful/rich-text-types';
-import { Asset, Entry, EntryFields } from 'contentful';
+import { Asset, Entry, EntryFields, EntrySkeletonType } from 'contentful';
+import { ReactNode } from 'react';
 
 // General Contentful Entry Interface
 export interface ContentfulEntry<T> {
@@ -90,7 +91,7 @@ export interface EventFields {
 }
 
 // Define Event Entry
-export type EventEntry = ContentfulEntry<EventFields>;
+//export type EventEntry = ContentfulEntry<EventFields>;
 
 // Processed Contentful Event
 export interface ContentfulEvent {
@@ -101,48 +102,72 @@ export interface ContentfulEvent {
   signUpLink: string;
 }
 
-// Community Page Fields
-// Community Page Fields
-export interface CommunityFields {
-  title: string;
-  description: string;
-  bannerImage: Asset;
-  members: string[]; // assuming members is an array of string member names or IDs
-  upcomingEvents: EventEntry[]; // updated to match the structure used in the client
-  guidesForMembers: GuideEntry[]; // updated to match the structure used in the client
+
+
+// Define Community Content Model
+export interface CommunityFields extends EntrySkeletonType {
+  fields: {
+    title: string;
+    heroImage: Asset;
+    heroText: string;
+    upcomingEvents?: Entry<EventFields>[]; // Array of linked entries for events
+    memberImage: Asset;
+    memberName: string;
+    memberRole: string;
+    memberBio: string;
+    guidesForMembers?: Entry<GuideFields>[]; // Array of linked entries for guides
+  };
 }
 
-// Guide Fields
+// Define Event Content Model
+export interface EventFields {
+  title: string;
+  description: string;
+  date: string;
+}
+
+// Define Guide Content Model
 export interface GuideFields {
   title: string;
   description: string;
+  content: string;
+  type: string;
+  author: string;
+  publishDate: string;
+  featuredImage: Asset;
+  gallery: Asset[];
 }
 
-// Define Guide Entry
-export type GuideEntry = ContentfulEntry<GuideFields>;
-
-// Define Community Entry
-export type CommunityEntry = ContentfulEntry<CommunityFields>;
-
-// Processed Community Page
+// Processed Community Page Type
 export interface ProcessedCommunityPage {
   title: string;
-  description: string;
-  bannerImage: {
-    url: string;
-    description: string;
-  };
-  members: string[];
+  heroImage: { url: string };
+  heroText: string;
   upcomingEvents: {
     title: string;
     description: string;
     date: string;
   }[];
+  members: {
+    memberImage: { url: string };
+    memberName: string;
+    memberRole: string;
+    memberBio: string;
+  };
   guidesForMembers: {
     title: string;
     description: string;
+    content: string;
+    type: string;
+    author: string;
+    publishDate: string;
+    featuredImage: {
+      url: string;
+      description: string;
+    };
+    gallery: {
+      url: string;
+      description: string;
+    }[];
   }[];
 }
-
-// Update Union Type for Combined Entries
-export type CombinedPageEntry = AboutPageEntry | ResourcesPageEntry | BrandEntry | EventEntry | CommunityEntry;

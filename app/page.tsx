@@ -1,17 +1,16 @@
 import React from "react";
 import Link from "next/link";
-import { fetchAboutUs, fetchResources, fetchBrands, fetchEvents } from "@/lib/contentfulClient";
-import { AboutPageEntry, ContentfulResource, ContentfulBrand, ContentfulEvent,  } from "@/types/contentful.types";
-import { Button } from '@/components/ui/button.ui';
-import Image from 'next/image';
-import { Facebook, Instagram, Twitter, Youtube } from 'lucide-react';
-import { fotter1, fotter2, items } from "@/constants/menu.constants";
+import { fetchAboutUs, fetchResources, fetchBrands, fetchEvents, fetchCommunityPage } from "@/lib/contentfulClient";
+import { AboutPageEntry, ContentfulResource, ContentfulBrand, ContentfulEvent, ProcessedCommunityPage } from "@/types/contentful.types";
+
 
 export default async function HomePage() {
   const aboutData: AboutPageEntry | null = await fetchAboutUs();
   const resources: ContentfulResource[] = await fetchResources();
   const brands: ContentfulBrand[] = await fetchBrands();
   const events: ContentfulEvent[] = await fetchEvents();
+  const communityData: ProcessedCommunityPage | null = await fetchCommunityPage();
+
 
   return (
     <>
@@ -151,6 +150,7 @@ export default async function HomePage() {
           </div>
         </section>
 
+        
         {/* Community Section */}
         <section id="community" className="bg-[#556B2F] text-[#F5F5DC] py-16">
           <div className="container mx-auto px-6 text-center">

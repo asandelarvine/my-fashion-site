@@ -1,6 +1,7 @@
 
 import { createClient } from 'contentful';
-import { ContentfulResource, AboutPageEntry, ContentfulBrand, ContentfulEvent, CommunityEntry, ProcessedCommunityPage} from '@/types/contentful.types';
+import { ContentfulResource, AboutPageEntry, ContentfulBrand, ContentfulEvent, CommunityFields, ProcessedCommunityPage} from '@/types/contentful.types';
+
 
 export const contentfulClient = createClient({
   space: process.env.CONTENTFUL_SPACE_ID as string,
@@ -143,45 +144,57 @@ export const fetchEvents = async (): Promise<ContentfulEvent[]> => {
 };
 
 //community
+
 export const fetchCommunityPage = async (): Promise<ProcessedCommunityPage | null> => {
   try {
-    const response = await contentfulClient.getEntries({
-      content_type: 'community', // Replace with actual content type ID for community page
+    const response = await contentfulClient.getEntries<CommunityFields>({
+      content_type: 'community',
       limit: 1,
     });
 
-    if (response.items.length > 0) {
-      const data = response.items[0].fields;
+    if (response.items.length === 0) return null;
 
-      // Map data to `ProcessedCommunityPage` structure with null-checks and type-casting
-      return {
-        title: typeof data.title === 'string' ? data.title : '',
-        description: typeof data.description === 'string' ? data.description : '',
-        bannerImage: data.bannerImage && data.bannerImage.fields.file.url ? data.bannerImage.fields.file.url : '',
+    const data = response.items[0].fields;
 
-        // Ensure members is an array of strings, or default to an empty array
-        members: Array.isArray(data.members) ? data.members.map(member => (typeof member === 'string' ? member : '')).filter(Boolean) : [],
-
-        // Ensure upcomingEvents is an array of events, or default to an empty array
-        upcomingEvents: Array.isArray(data.upcomingEvents)
-          ? data.upcomingEvents.map(event => ({
-              title: typeof event.fields.title === 'string' ? event.fields.title : '',
-              description: typeof event.fields.description === 'string' ? event.fields.description : '',
-              date: typeof event.fields.date === 'string' ? event.fields.date : '',
-            }))
-          : [],
-
-        // Ensure guidesForMembers is an array of guides, or default to an empty array
-        guidesForMembers: Array.isArray(data.guidesForMembers)
-          ? data.guidesForMembers.map(guide => ({
-              title: typeof guide.fields.title === 'string' ? guide.fields.title : '',
-              description: typeof guide.fields.description === 'string' ? guide.fields.description : '',
-            }))
-          : [],
-      };
-    }
-
-    return null;
+    return {
+      title: data.title || '',
+      heroImage: {
+        url: data.heroImage?.fields?.file?.url || '',
+      },
+      heroText: data.heroText || '',
+      upcomingEvents: Array.isArray(data.upcomingEvents)
+        ? data.upcomingEvents.map((event: { fields: { title: any; description: any; date: any; }; }) => ({
+            title: event.fields?.title || '',
+            description: event.fields?.description || '',
+            date: event.fields?.date || '',
+          }))
+        : [],
+      members: {
+        memberImage: {
+          url: data.memberImage?.fields?.file?.url || '',
+        },
+        memberName: data.memberName || '',
+        memberRole: data.memberRole || '',
+        memberBio: data.memberBio || '',
+      },
+      guidesForMembers: Array.isArray(data.guidesForMembers)
+        ? data.guidesForMembers.map((guide: { fields: { title: any; description: any; content: any; featuredImage: { fields: { file: { url: any; }; description: any; }; }; gallery: any[]; }; }) => ({
+            title: guide.fields?.title || '',
+            description: guide.fields?.description || '',
+            content: guide.fields?.content || '',
+            featuredImage: {
+              url: guide.fields?.featuredImage?.fields?.file?.url || '',
+              description: guide.fields?.featuredImage?.fields?.description || '',
+            },
+            gallery: Array.isArray(guide.fields?.gallery)
+              ? guide.fields?.gallery.map(image => ({
+                  url: image.fields?.file?.url || '',
+                  description: image.fields?.description || '',
+                }))
+              : [],
+          }))
+        : [],
+    };
   } catch (error) {
     console.error('Error fetching community page data:', error);
     return null;
